@@ -1,0 +1,13 @@
+div {
+    margin: 3px;
+    background-color: #FAFA;
+    height: 100px;
+}
+
+#highlighter {
+    position: absolute;
+    background-color: rgba(0,0,255,0.2);
+    margin: 0;
+    padding: 0;
+    border: none;
+}

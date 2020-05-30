@@ -1,0 +1,56 @@
+:root {
+  --header-height: 25px;
+}
+
+body, div, iframe {
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline-width: 0;
+  tab-size: 4;
+}
+
+#app_container {
+  height: 100vh;
+}
+/* #app_container */
+#app_header {
+  height: var(--header-height);
+  background-color: darkcyan;
+  display: flex;
+}
+
+#app_body {
+  height: calc(100% - var(--header-height));
+  background-color: darkgreen;
+  display: flex;
+}
+/* END #app_container */
+
+/* #app_body */
+#left {
+  background-color: darkviolet;
+  width: 100%;
+  max-width: 250px;
+  padding: 5px;
+}
+
+#preview_container {
+  width: 100%;
+  background-color: darkviolet;
+  min-width: 300px;
+  padding: 5px;
+}
+/* END #app_body */
+
+/* #preview_container */
+#outer_iframe {
+  height: 100%;
+  width: 100%;
+  background-color: deeppink;
+}
+/* END #preview_container */
+
+#inspect {
+  cursor: pointer;
+}

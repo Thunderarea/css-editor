@@ -18,6 +18,19 @@ class CSSEditor extends React.Component {
         this.setState({items: items});
     }
 
+    getElementsDescription = () => {
+        let description = "";
+        if(this.props.elementsCss.element) {
+            let el = this.props.elementsCss.element;
+            description = el.tagName.toLowerCase();
+            description+= (el.id) ? "#"+el.id : "";
+            el.classList.forEach(class_name => {
+                description+="."+class_name;
+            });
+        }
+        return description;
+    }
+
     shouldComponentUpdate(nextProps, nextState) {
         if(nextProps.elementsCss !== this.props.elementsCss) {
             var items = [];
@@ -27,7 +40,8 @@ class CSSEditor extends React.Component {
                     id: ++this.key,
                     fileName: rule.fileName,
                     selector: rule.css.selectorText,
-                    style: rule.css.style.cssText
+                    style: rule.css.style.cssText,
+                    styleObject: rule.css.style
                 };
                 items.unshift(newItem);
             });
@@ -38,10 +52,11 @@ class CSSEditor extends React.Component {
     }
 
     render() {
-        console.log("render");
+        
         
         return (
             <div id="css_editor">
+                <div id="inspected_element">{this.getElementsDescription()}</div>
                 <div className="css_rules">
                     {this
                         .state
@@ -52,6 +67,7 @@ class CSSEditor extends React.Component {
                                 fileName={item.fileName}
                                 selector={item.selector}
                                 style={item.style}
+                                styleObject={item.styleObject}
                                 remove={this.removeChild}
                                 id={item.id}/>;
                         })}

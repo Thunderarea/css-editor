@@ -58,23 +58,14 @@ class Preview extends React.Component {
                     cssRules: findCSSRules(el, this.innerIframeDoc)
                 });
             }
-            console.log(el);
         }
     }
 
     removeHighlight = () => {
+        this.innerIframeDoc.removeEventListener("mousedown", this.handleClick);
         this.innerIframeDoc.removeEventListener("mouseover", this.Highlight);
         this.innerIframeDoc.removeEventListener("scroll", this.updateHighlightedPosition);
-        this.innerIframeDoc.removeEventListener("mousedown", this.handleClick);
         this.outerHighlight.current.style.display = "none";
-    }
-
-    handleLoad = () => {
-        this.outerIframeDoc = this.outerIframe.current.contentDocument;
-        this
-            .outerIframeDoc
-            .removeChild(this.outerIframeDoc.firstElementChild);
-        this.forceUpdate();
     }
 
     updateHighlightedPosition() {
@@ -90,40 +81,131 @@ class Preview extends React.Component {
         this.innerIframeDoc = this.innerIframe.current.contentDocument;
         let styleLinks = this.innerIframeDoc.head.querySelectorAll("link");
         
-        if(styleLinks.length && this.props.files.styleSheets.length) {
-            let styleSheets = [...this.props.files.styleSheets];
-            let name = "";
-            let parts = [];
-            let styleEl = null;
-            styleLinks.forEach(el => {
-                parts = el.attributes.href.value.trim().split("/");
-                name = parts[parts.length - 1];
-                
-                for (let i = 0; i < styleSheets.length; i++) {
-                    if (styleSheets[i].name === name) {
-                        styleEl = document.createElement("style");
-                        styleEl.id = el.attributes.href.value.trim();
-                        styleEl.textContent = styleSheets[i].content;
-                        el.parentNode.replaceChild(styleEl, el);
-                        styleSheets.splice(i,1);
-                        break;
+        if(styleLinks.length) {
+            if (this.props.files.styleSheets.length) {
+                let styleSheets = [...this.props.files.styleSheets];
+                let name = "";
+                let parts = [];
+                let styleEl = null;
+                styleLinks.forEach(el => {
+                    parts = el.attributes.href.value.trim().split("/");
+                    name = parts[parts.length - 1];
+                    
+                    for (let i = 0; i < styleSheets.length; i++) {
+                        if (styleSheets[i].name === name) {
+                            styleEl = document.createElement("style");
+                            styleEl.id = el.attributes.href.value.trim();
+                            styleEl.textContent = styleSheets[i].content;
+                            el.parentNode.replaceChild(styleEl, el);
+                            styleSheets.splice(i,1);
+                            break;
+                        }
                     }
-                }
-            });
-        }
-        this.outerIframeDoc.onmouseenter = () => {
+                });
+            } else ;//warn the user that does not have select any css file
+        } else ;//warn the user that deos not have external stylesheets in his html file
+        this.outerIframeDoc.addEventListener("mouseenter", () => {
             if(this.props.inspect) {
                 this.innerIframeDoc.addEventListener("mousedown", this.handleClick);
                 this.innerIframeDoc.addEventListener("mouseover", this.Highlight);
                 this.innerIframeDoc.addEventListener("scroll", this.updateHighlightedPosition);
             }
-        }
-        this.outerIframeDoc.addEventListener("mouseleave", this.removeHighlight, true)
+        }, true);
+        this.outerIframeDoc.addEventListener("mouseleave", this.removeHighlight, true);
+    }
+
+    handleLoad = () => {
+        this.outerIframeDoc = this.outerIframe.current.contentDocument;
+        this
+            .outerIframeDoc
+            .removeChild(this.outerIframeDoc.firstElementChild);
+        //removes the html content (with the html tag) to can add manually the html from html tag
+        this.forceUpdate();
     }
 
     shouldComponentUpdate(nextProps) {
         if((nextProps.inspect !== this.props.inspect) || compareProps(nextProps, this.props)) return false;
         return true;
+    }
+
+    getIframeContent = () => {
+        if(this.props.files.html === "") {
+            return (
+                <html style={{height: "100%", width: "100%"}}>
+                    <head>
+                        <title>Instructions</title>
+                    </head>
+                    <body style={{backgroundColor: "white", textAlign: "center"}}>
+                        <h1>From Scratch<sup style={{fontSize: "large"}}>BETA</sup></h1>
+                        <h2>Instructions</h2>
+                        <div style={{width: "fit-content", margin: "auto"}}>
+                            <ol style={{textAlign: "left"}}>
+                                <li>Choose your files from "choose files" button.
+                                    <ul>
+                                        <li>In your files must be included only one html file and the css files that are linked with the html file</li>
+                                        <li>All files must be in the same folder</li>
+                                    </ul>
+                                </li>
+                                <li>Your html file that you have choose will open</li>
+                                <li>Press the inspect button</li>
+                                <li>Hover over the elements. Click on to see it's css in the side panel (only the simple style rules. Not import, media rules,keyframes etc)</li>
+                                <li>The css editor functions as the browsers developers tools css editor</li>
+                                <li>You can change the existing css and add new declarations in the existing classes, ids etc. You cannot edit the selectors</li>
+                            </ol>
+                        </div>
+                    </body>
+                </html>
+            );
+        } else {
+            let bodyStyle = {
+                margin: 0,
+                padding: 0,
+                height: "100%",
+                width: "100%",
+                overflow: "hidden"
+            };
+            let innerIframe = {
+                border: "none",
+                margin: 0,
+                backgroundColor: "white"
+            };
+            let outerHighlighter = {
+                position: "absolute",
+                display: "none",
+                border: "0 solid rgba(249, 175, 63, 0.69)",
+                backgroundColor: "rgba(251, 245, 61, 0.7)",
+                pointerEvents: "none"
+            };
+            let innerHighlighter = {
+                height: "100%",
+                width: "100%",
+                border: "0 solid rgba(108, 210, 108, 0.78)",
+                boxSizing: "border-box",
+                backgroundColor: "rgba(99, 183, 255, 0.88)",
+                pointerEvents: "none"
+            };
+            return (
+                <html style={{height: "100%", width: "100%"}}>
+                    <head>
+                        <title>Outer Iframe</title>
+                    </head>
+                    <body style={bodyStyle}>
+                        <iframe title="inner iframe" 
+                                src={this.getBlobURL(this.props.files.html, "text/html")} 
+                                height="100%" 
+                                width="100%" 
+                                style={innerIframe}
+                                onLoad={(e) => this.handleInnerLoad(e)}
+                                ref={this.innerIframe}>
+                        </iframe>
+                        <div id="highlighter_outer" ref={this.outerHighlight} style={outerHighlighter}>
+                            <div id="highlighter_inner" ref={this.innerHighlight} style={innerHighlighter}></div>
+                        </div>
+                    </body>
+                </html>
+            );
+        }
+        
     }
 
     componentDidMount() {
@@ -133,65 +215,11 @@ class Preview extends React.Component {
             .addEventListener("load", this.handleLoad);
     }
 
-    componentWillUnmout() {
-        this
-            .outerIframe
-            .current
-            .removeEventListener("load", this.handleLoad);
-    }
-
     render() {
-        let bodyStyle = {
-            margin: 0,
-            padding: 0,
-            height: "100%",
-            width: "100%",
-            overflow: "hidden"
-        };
-        let innerIframe = {
-            border: "none",
-            margin: 0,
-            backgroundColor: "white"
-        };
-        let outerHighlighter = {
-            position: "absolute",
-            display: "none",
-            border: "0 solid rgba(249, 175, 63, 0.69)",
-            backgroundColor: "rgba(251, 245, 61, 0.7)",
-            pointerEvents: "none"
-        };
-        let innerHighlighter = {
-            height: "100%",
-            width: "100%",
-            border: "0 solid rgba(108, 210, 108, 0.78)",
-            boxSizing: "border-box",
-            backgroundColor: "rgba(99, 183, 255, 0.88)",
-            pointerEvents: "none"
-        };
-        let innerIframeSource = (this.props.files.html === "") ? "about:blank": this.getBlobURL(this.props.files.html, "text/html");
-         
-        let iframeContent = (
-            <html style={{height: "100%", width: "100%"}}>
-                <head>
-                    <title>Nikos</title>
-                </head>
-                <body style={bodyStyle}>
-                    <iframe title="inner iframe" 
-                            src={innerIframeSource} 
-                            height="100%" 
-                            width="100%" 
-                            style={innerIframe}
-                            onLoad={(e) => this.handleInnerLoad(e)}
-                            ref={this.innerIframe}>
-                    </iframe>
-                    <div id="highlighter_outer" ref={this.outerHighlight} style={outerHighlighter}>
-                        <div id="highlighter_inner" ref={this.innerHighlight} style={innerHighlighter}></div>
-                    </div>
-                </body>
-            </html>
-        );
+        let iframeContent = this.getIframeContent();
+        
         return (
-            <iframe title="outer iframe" id="outer_iframe" ref={this.outerIframe} srcDoc="<!DOCTYPE html>">
+            <iframe title="outer_iframe" id="outer_iframe" ref={this.outerIframe} srcDoc="<!DOCTYPE html>">
                 {this.outerIframeDoc && ReactDOM.createPortal(iframeContent, this.outerIframeDoc)}
             </iframe>
         );
@@ -206,29 +234,30 @@ function findCSSRules(el, doc) {
     let cssRules = [];
     for (let i = 0; i < sheets.length; i++) {
         for (let j = 0; j < sheets[i].cssRules.length; j++) {
-          sheets[i].cssRules[j].selectorText.split(",").forEach((selector) => {
-            parent.querySelectorAll(":scope > "+selector.trim()).forEach((item) => {
-              if (item === el) {
-                //with order that appear inside the document
-                //the order play role on some styles
-                cssRules.unshift({
-                    fileName: sheets[i].ownerNode.id,
-                    css: sheets[i].cssRules[j]
-                });
-              }
-            });
-          });
+            if (sheets[i].cssRules[j].type === 1) {
+                sheets[i].cssRules[j].selectorText.split(",").forEach((selector) => {
+                    parent.querySelectorAll(":scope > "+selector.trim()).forEach((item) => {
+                      if (item === el) {
+                        cssRules.unshift({
+                            fileName: sheets[i].ownerNode.id,
+                            css: sheets[i].cssRules[j]
+                        });
+                      }
+                    });
+                  });
+            }
         }
-    }    
-    //console.log(cssRules);
+    } 
     return cssRules;
 }
 
+
+//Is it need?
 function compareProps(next, current) {
     if(next.files !== current.files) return false;
     return true;
 }
 
 /*
-
+when a declaration is commented must be disabled
 */

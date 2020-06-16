@@ -7,6 +7,11 @@ input {
 #css_editor {
     height: 100%;
     background-color: white;
+    color: black;
+}
+
+#inspected_element {
+    padding: 5px 5px 0;
 }
 
 .css_rules {
@@ -22,10 +27,12 @@ input {
 
 .css_file {
     font-size: 14px;
+    color: grey;
 }
 
 .css_declaration,
 .css_selector_container {
+    width: moz-fit-content;
     width: fit-content;
     max-width: 300px;
     overflow-wrap: anywhere;
@@ -45,6 +52,7 @@ input {
 
 .css_declarations {
     margin: 0;
+    width: moz-fit-content;
     width: fit-content;
     padding-inline-start: 0;
     list-style-type: none;

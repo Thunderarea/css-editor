@@ -10,8 +10,6 @@ class Header extends React.Component {
 
     handleFileChange = (e) => {
         let filesList = e.target.files;
-        console.log(filesList[0]);
-
         const length = filesList.length;
         if (length !== 0) {
             var files = {
@@ -21,12 +19,13 @@ class Header extends React.Component {
             var i = 0;
             var reader = new FileReader();
 
-            reader.onload = (e) => {
+            reader.onload = () => {
                 let text = reader.result;
                 if (filesList[i].type === "text/html") 
                     files.html = text;
                 else if (filesList[i].type === "text/css") 
                     files.styleSheets.push({name: filesList[i].name, content: text});
+                else ;//send a message to user about what type of file can upload
                 if (++i < length) 
                     reader.readAsText(filesList[i]);
                 else 
@@ -34,7 +33,6 @@ class Header extends React.Component {
                         .props
                         .setFiles(files);
                 }
-            
             reader.readAsText(filesList[i]);
         }
     }
@@ -55,11 +53,11 @@ class Header extends React.Component {
                 </div>
                 <div id="inspect" onClick={this.handleInspect}>
                     <svg
-                        className="bi bi-box-arrow-in-up-left"
+                        
                         width="1em"
                         height="100%"
                         viewBox="0 0 16 16"
-                        fill= {(this.state.inspect) ? "springgreen" : "currentColor"}
+                        fill= {(this.state.inspect) ? "white" : "currentColor"}
                         xmlns="http://www.w3.org/2000/svg">
                         <path
                             fillRule="evenodd"

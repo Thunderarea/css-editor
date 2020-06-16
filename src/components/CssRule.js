@@ -16,13 +16,13 @@ class CSSRule extends React.Component {
 
     handleMouseDown(e) {
         const target = e.target;
-        if (target.classList.contains("css_rule") && (document.activeElement.classList.contains("dec_property") && !document.activeElement.textContent.trim())) 
+        if ((target.classList.contains("css_rule") || target.classList.contains("css_declarations")) && (document.activeElement.classList.contains("dec_property") && !document.activeElement.textContent.trim())) 
             e.preventDefault();
         }
     
     handleMouseUp(e) {
         const target = e.target;
-        if (target.classList.contains("css_rule")) {
+        if (target.classList.contains("css_rule") || target.classList.contains("css_declarations")) {
             e.preventDefault();
             if (document.activeElement.classList.contains("dec_property") && !document.activeElement.textContent.trim()) 
                 document.activeElement.blur();
@@ -53,6 +53,7 @@ class CSSRule extends React.Component {
     initializeDeclarations = () => {
         let newItem = null, dec = [];
         let items = [];
+        
         this.props.style.split(";").forEach(declaration => {
             if(declaration !== "") {
                 dec = declaration.split(":");
@@ -119,8 +120,6 @@ class CSSRule extends React.Component {
     }
 
     render() {
-        console.log("rendere erer");
-        
         let disabled = (this.state.disabled)
             ? "disabled"
             : "enabled";
@@ -138,10 +137,7 @@ class CSSRule extends React.Component {
                     <span
                         className="css_selector"
                         spellCheck="false"
-                        contentEditable="false"
-                        onKeyDown={(e) => this.selectorKeyListener(e)}
-                        onBlur={(e) => this.handleBlur(e)}
-                        onMouseDown={(e) => clickEditable(e)}>
+                        contentEditable="false">
                         {this.props.selector}
                     </span>
                     <span>&nbsp;&#123;</span>
@@ -158,6 +154,7 @@ class CSSRule extends React.Component {
                                 property={item.property}
                                 value={item.value}
                                 focused={focused}
+                                styleObject={this.props.styleObject}
                                 nextDec={this.nextDeclaration}
                                 EnDisCheckbox={this.EnDisCheckbox}
                                 remove={this.removeDeclaration}/>;
@@ -170,3 +167,10 @@ class CSSRule extends React.Component {
 }
 
 export default CSSRule;
+
+/**
+ * from the css selector
+ *  onKeyDown={(e) => this.selectorKeyListener(e)}
+    onBlur={(e) => this.handleBlur(e)}
+    onMouseDown={(e) => clickEditable(e)}
+ */

@@ -2,15 +2,14 @@ import React from "react";
 import Header from "./Header.js";
 import Body from "./Body.js";
 import "../styles/app.css";
-//import "../styles/header_style.css"; import "../styles/style.css";
 
 class App extends React.Component {
     constructor() {
         super();
         this.state = {
             files: {
-                html: "",
-                styleSheets: []
+                html: "", //html text
+                styleSheets: [] //file and cssText of file
             },
             inspect: false
         };

@@ -1,33 +1,33 @@
 import React from "react";
 import Preview from "./Preview.js";
-import CSSEditor from "./CssEditor.js"
+import CSSEditor from "./CssEditor.js";
 
 class Body extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            elCss: {
+            elementsCss: {
                 element: null,
                 cssRules: []
             }
         };
     }
 
-    sendCss = (elCss) => {
-        this.setState({elCss: elCss});
+    setElementsCss = (elementsCss) => {
+        this.setState({elementsCss: elementsCss});
     }
 
     render() {
         return (
             <div id="app_body">
-                <div id="left">
-                    <CSSEditor elementsCss={this.state.elCss}/>
+                <div id="side_panel">
+                    <CSSEditor elementsCss={this.state.elementsCss}/>
                 </div>
                 <div id="preview_container">
                     <Preview 
                         files={this.props.files} 
                         inspect={this.props.inspect}
-                        elementsCss={this.sendCss}/>
+                        elementsCss={this.setElementsCss}/>
                 </div>
             </div>
         );

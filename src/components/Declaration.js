@@ -6,7 +6,7 @@ class Declaration extends React.Component {
         super(props);
         this.state = {
             decClass: "",
-            startComment: " ",
+            startComment: "  ",
             endComment: "",
             checked: true
         };
@@ -45,14 +45,17 @@ class Declaration extends React.Component {
 
     handleBlur(e, value) {
         if (value) {
-            if (onBlur(e) && (e.relatedTarget !== this.DecProperty.current)) 
+            if (onBlur(e) && (e.relatedTarget !== this.DecProperty.current)) {
                 this.props.remove(this.props.id);
+                this.props.styleObject.removeProperty(this.property);
             }
-        else {
-            if (onBlur(e) || ((e.relatedTarget !== this.DecValue.current) && !this.DecValue.current.textContent.trim())) 
+        } else {
+            if (onBlur(e) || ((e.relatedTarget !== this.DecValue.current) && !this.DecValue.current.textContent.trim())) {
                 this.props.remove(this.props.id);
+                this.props.styleObject.removeProperty(this.property);
             }
         }
+    }
 
     focusEditableElement = (el) => {
         el.setAttribute("contentEditable", "true");
@@ -61,35 +64,34 @@ class Declaration extends React.Component {
 
     handleCheckChange(e) {
         let target = e.target;
-        console.log(target.checked);
         if (target.checked) {
-            this.setState({decClass: "", startComment: " ", endComment: "", checked: true});
+            this.setState({decClass: "", startComment: "  ", endComment: "", checked: true});
         } else {
-            this.setState({decClass: "is_comment", startComment: " /*", endComment: "*/", checked: false});
+            this.setState({decClass: "is_comment", startComment: "  /*", endComment: "*/", checked: false});
         }
+    }
+
+    handleChange() {
+        this.props.styleObject.setProperty(this.DecProperty.current.textContent.trim(), this.DecValue.current.textContent.trim(), "");
+        let value = this.props.styleObject.getPropertyValue(this.DecProperty.current.textContent.trim());
+        if(value !== "") this.property = this.DecProperty.current.textContent.trim();
+        console.log(this.property);
     }
 
     componentDidMount() {
         this.focusEditableElement(this.DecProperty.current);
+        this.property = this.props.property;
     }
 
     componentDidUpdate() {
-        this.Checkbox.current.checked = this.state.checked;
+        //this.Checkbox.current.checked = this.state.checked;
     }
 
     render() {
-        if (this.props.focused) 
-            this.focusEditableElement(this.DecProperty.current);
+        if (this.props.focused) this.focusEditableElement(this.DecProperty.current);
         return (
-            <li className={"css_declaration" + this.state.decClass}>
+            <li className={"css_declaration " + this.state.decClass}>
                 <span className="space_and_comments start">{this.state.startComment}</span>
-                <input
-                    className="comment"
-                    type="checkbox"
-                    onMouseEnter={(e) => this.handleMouse(false)}
-                    onMouseLeave={(e) => this.handleMouse(true)}
-                    onChange={(e) => this.handleCheckChange(e)}
-                    ref={this.Checkbox}/>
                 <span
                     className="dec_property"
                     spellCheck="false"
@@ -97,7 +99,8 @@ class Declaration extends React.Component {
                     ref={this.DecProperty}
                     onKeyDown={(e) => this.propertyKeyListener(e)}
                     onBlur={(e) => this.handleBlur(e, false)}
-                    onMouseDown={(e) => clickEditable(e)}>
+                    onMouseDown={(e) => clickEditable(e)}
+                    onKeyUp={() => this.handleChange()}>
                         {this.props.property}
                     </span>
                 <span>:&nbsp;</span>
@@ -107,6 +110,7 @@ class Declaration extends React.Component {
                     contentEditable="false"
                     ref={this.DecValue}
                     onKeyDown={(e) => this.valueKeyListener(e)}
+                    onKeyUp={() => this.handleChange()}
                     onBlur={(e) => this.handleBlur(e, true)}
                     onMouseDown={(e) => clickEditable(e)}>
                         {this.props.value}
@@ -119,3 +123,14 @@ class Declaration extends React.Component {
 }
 
 export default Declaration;
+
+
+/*<input
+  className="comment"
+  type="checkbox"
+  onMouseEnter={(e) => this.handleMouse(false)}
+  onMouseLeave={(e) => this.handleMouse(true)}
+  onChange={(e) => this.handleCheckChange(e)}
+  ref={this.Checkbox}/>    
+  */                                                                                     
+
